@@ -2,6 +2,7 @@ package com.zut.localcrafts.navigation
 
 
 import androidx.compose.runtime.Composable
+import android.net.Uri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,19 +30,35 @@ fun AppNavigation() {
         }
 
         composable("auth") {
-            ArtisanAuthScreen()
+            ArtisanAuthScreen(
+                onLoginSuccess = {
+                    navController.navigate("profile")
+                }
+            )
         }
 
         composable("home") {
-            HomeScreen()
+            HomeScreen(
+                onProductClick = { productName ->
+                    navController.navigate("search/${Uri.encode(productName)}")
+                }
+            )
         }
 
-        composable("search") {
-            SearchScreen()
+        composable("search/{productName}") { backStackEntry ->
+            val productName = backStackEntry.arguments?.getString("productName") ?: ""
+
+            SearchScreen(
+                productName = productName
+            )
         }
 
         composable("profile") {
-            ArtisanProfileScreen()
+            ArtisanProfileScreen(
+                onExploreClick = {
+                    navController.navigate("home")
+                }
+            )
         }
     }
 }
