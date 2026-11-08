@@ -1,5 +1,10 @@
 package com.zut.localcrafts.screens
 
+import com.zut.localcrafts.data.Product
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModel
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModelFactory
+import java.util.UUID
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,58 +12,86 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-private data class ArtisanProduct(
-    val name: String,
-    val description: String,
-    val price: String
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun ArtisanProfileScreen(
     onExploreClick: () -> Unit
 ) {
 
-    var selectedSection by remember { mutableStateOf("My Profile") }
+    // Connect to the database through the ViewModel
+    val context = LocalContext.current
 
-    // Artisan information
-    var artisanName by remember { mutableStateOf("Grace Banda") }
-    var businessName by remember { mutableStateOf("Grace Crafts") }
-    var location by remember { mutableStateOf("Lusaka") }
-    var speciality by remember { mutableStateOf("Handmade Jewellery") }
-    var description by remember {
-        mutableStateOf("I create beautiful handmade jewellery inspired by local creativity.")
+    val viewModel: LocalCraftsViewModel = viewModel(
+        factory = LocalCraftsViewModelFactory(context)
+    )
+
+    // Get products from Room Database
+    val products by viewModel.products.collectAsState()
+
+    var selectedSection by remember {
+        mutableStateOf("My Profile")
     }
 
-    var profileMessage by remember { mutableStateOf("") }
+    // Artisan information
+    var artisanName by remember {
+        mutableStateOf("Grace Banda")
+    }
 
-    // Sample products
-    val products = remember {
-        mutableStateListOf(
-            ArtisanProduct(
-                "Beaded Necklace",
-                "Colourful handmade necklace.",
-                "120"
-            ),
-            ArtisanProduct(
-                "Bracelet Set",
-                "Handcrafted beaded bracelets.",
-                "80"
-            )
+    var businessName by remember {
+        mutableStateOf("Grace Crafts")
+    }
+
+    var location by remember {
+        mutableStateOf("Lusaka")
+    }
+
+    var speciality by remember {
+        mutableStateOf("Handmade Jewellery")
+    }
+
+    var description by remember {
+        mutableStateOf(
+            "I create beautiful handmade jewellery inspired by local creativity."
         )
     }
 
-    // Product dialog information
-    var showProductDialog by remember { mutableStateOf(false) }
-    var editingIndex by remember { mutableIntStateOf(-1) }
+    var profileMessage by remember {
+        mutableStateOf("")
+    }
 
-    var productName by remember { mutableStateOf("") }
-    var productDescription by remember { mutableStateOf("") }
-    var productPrice by remember { mutableStateOf("") }
-    var productMessage by remember { mutableStateOf("") }
+    // Product dialog information
+    var showProductDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var editingIndex by remember {
+        mutableIntStateOf(-1)
+    }
+
+    var productName by remember {
+        mutableStateOf("")
+    }
+
+    var productDescription by remember {
+        mutableStateOf("")
+    }
+
+    var productCategory by remember {
+        mutableStateOf("")
+    }
+
+    var productPrice by remember {
+        mutableStateOf("")
+    }
+
+    var productMessage by remember {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier
@@ -75,9 +108,7 @@ fun ArtisanProfileScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = "Manage your business and handmade products."
-        )
+        Text("Manage your business and handmade products.")
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -88,12 +119,9 @@ fun ArtisanProfileScreen(
             Text("Explore Crafts")
         }
 
-        Spacer(modifier = Modifier.height(24.dp)
-
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Section navigation
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -122,9 +150,9 @@ fun ArtisanProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Dynamic content
-
         if (selectedSection == "My Profile") {
+
+            // PROFILE SECTION
 
             Text(
                 text = "Business Information",
@@ -191,6 +219,7 @@ fun ArtisanProfileScreen(
 
             if (profileMessage.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
                     text = profileMessage,
                     color = MaterialTheme.colorScheme.primary
@@ -198,6 +227,8 @@ fun ArtisanProfileScreen(
             }
 
         } else {
+
+            // PRODUCTS SECTION
 
             Text(
                 text = "My Products",
@@ -207,17 +238,17 @@ fun ArtisanProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Add and manage the products you showcase."
-            )
+            Text("Add and manage the products you showcase.")
 
             Spacer(modifier = Modifier.height(18.dp))
 
+            // Add product button
             Button(
                 onClick = {
                     editingIndex = -1
                     productName = ""
                     productDescription = ""
+                    productCategory = ""
                     productPrice = ""
                     productMessage = ""
                     showProductDialog = true
@@ -233,6 +264,7 @@ fun ArtisanProfileScreen(
                 Text("You haven't added any products yet.")
             }
 
+            // Display products from database
             products.forEachIndexed { index, product ->
 
                 Card(
@@ -247,7 +279,7 @@ fun ArtisanProfileScreen(
                     ) {
 
                         Text(
-                            text = product.name,
+                            text = product.productName,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -255,6 +287,10 @@ fun ArtisanProfileScreen(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Text(product.description)
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text("Category: ${product.category}")
 
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -270,12 +306,14 @@ fun ArtisanProfileScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
 
+                            // Edit product
                             OutlinedButton(
                                 onClick = {
                                     editingIndex = index
-                                    productName = product.name
+                                    productName = product.productName
                                     productDescription = product.description
-                                    productPrice = product.price
+                                    productCategory = product.category
+                                    productPrice = product.price.toString()
                                     productMessage = ""
                                     showProductDialog = true
                                 }
@@ -283,9 +321,10 @@ fun ArtisanProfileScreen(
                                 Text("Edit")
                             }
 
+                            // Delete product
                             OutlinedButton(
                                 onClick = {
-                                    products.removeAt(index)
+                                    viewModel.deleteProduct(product)
                                     productMessage = "Product deleted."
                                 }
                             ) {
@@ -305,21 +344,28 @@ fun ArtisanProfileScreen(
         }
     }
 
-    // Add and edit product dialog
+    // ADD AND EDIT PRODUCT DIALOG
 
     if (showProductDialog) {
 
         AlertDialog(
+
             onDismissRequest = {
                 showProductDialog = false
             },
+
             title = {
                 Text(
-                    if (editingIndex == -1) "Add Product"
-                    else "Edit Product"
+                    if (editingIndex == -1) {
+                        "Add Product"
+                    } else {
+                        "Edit Product"
+                    }
                 )
             },
+
             text = {
+
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -338,6 +384,13 @@ fun ArtisanProfileScreen(
                     )
 
                     OutlinedTextField(
+                        value = productCategory,
+                        onValueChange = { productCategory = it },
+                        label = { Text("Category") },
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
                         value = productPrice,
                         onValueChange = { productPrice = it },
                         label = { Text("Price (K)") },
@@ -345,37 +398,72 @@ fun ArtisanProfileScreen(
                     )
                 }
             },
+
             confirmButton = {
+
                 TextButton(
                     onClick = {
+
+                        val priceValue = productPrice.toDoubleOrNull()
+
                         if (
                             productName.isNotBlank() &&
                             productDescription.isNotBlank() &&
-                            productPrice.isNotBlank()
+                            productCategory.isNotBlank() &&
+                            priceValue != null &&
+                            priceValue > 0
                         ) {
 
-                            val newProduct = ArtisanProduct(
-                                productName,
-                                productDescription,
-                                productPrice
+                            val newProduct = Product(
+
+                                productId = if (editingIndex == -1) {
+                                    UUID.randomUUID().toString()
+                                } else {
+                                    products[editingIndex].productId
+                                },
+
+                                artisanId = if (editingIndex == -1) {
+                                    "ART001"
+                                } else {
+                                    products[editingIndex].artisanId
+                                },
+
+                                productName = productName,
+                                description = productDescription,
+                                category = productCategory,
+                                price = priceValue
                             )
 
                             if (editingIndex == -1) {
-                                products.add(newProduct)
-                                productMessage = "Product added successfully!"
+
+                                viewModel.saveProduct(newProduct)
+
+                                productMessage =
+                                    "Product added successfully!"
+
                             } else {
-                                products[editingIndex] = newProduct
-                                productMessage = "Product updated successfully!"
+
+                                viewModel.updateProduct(newProduct)
+
+                                productMessage =
+                                    "Product updated successfully!"
                             }
 
                             showProductDialog = false
+
+                        } else {
+
+                            productMessage =
+                                "Please enter all details and a valid price."
                         }
                     }
                 ) {
                     Text("Save")
                 }
             },
+
             dismissButton = {
+
                 TextButton(
                     onClick = {
                         showProductDialog = false

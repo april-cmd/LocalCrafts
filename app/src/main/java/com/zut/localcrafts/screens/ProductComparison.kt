@@ -51,7 +51,7 @@ private val sampleArtisans = listOf(
 )
 
 @Composable
-fun SearchScreen(productName: String) {
+fun ProductComparisonScreen(productName: String) {
 
     Column(
         modifier = Modifier
