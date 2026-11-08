@@ -83,7 +83,7 @@ private val sampleArtisans = listOf(
 )
 
 @Composable
-fun SearchScreen(productName: String) {
+fun ProductComparisonScreen(productName: String) {
 
     // Find artisans who offer the selected product
     val matchingArtisans = sampleArtisans.filter { artisan ->

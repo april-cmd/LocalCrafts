@@ -1,8 +1,7 @@
 package com.zut.localcrafts.navigation
 
-
-import androidx.compose.runtime.Composable
 import android.net.Uri
+import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,7 +16,6 @@ fun AppNavigation() {
         navController = navController,
         startDestination = "landing"
     ) {
-
         composable("landing") {
             LandingScreen(
                 onExploreClick = {
@@ -40,15 +38,18 @@ fun AppNavigation() {
         composable("home") {
             HomeScreen(
                 onProductClick = { productName ->
-                    navController.navigate("search/${Uri.encode(productName)}")
+                    navController.navigate(
+                        "search/${Uri.encode(productName)}"
+                    )
                 }
             )
         }
 
         composable("search/{productName}") { backStackEntry ->
-            val productName = backStackEntry.arguments?.getString("productName") ?: ""
+            val productName =
+                backStackEntry.arguments?.getString("productName") ?: ""
 
-            SearchScreen(
+            ProductComparisonScreen(
                 productName = productName
             )
         }
@@ -62,5 +63,3 @@ fun AppNavigation() {
         }
     }
 }
-
-
