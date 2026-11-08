@@ -182,7 +182,17 @@ fun ArtisanProfileScreen(
 
             Button(
                 onClick = {
-                    profileMessage = "Profile updated successfully!"
+                    if (
+                        artisanName.isBlank() ||
+                        businessName.isBlank() ||
+                        location.isBlank() ||
+                        speciality.isBlank() ||
+                        description.isBlank()
+                    ) {
+                        profileMessage = "Please fill in all the fields."
+                    } else {
+                        profileMessage = "Profile updated successfully!"
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(0.75f)
             ) {
@@ -343,17 +353,28 @@ fun ArtisanProfileScreen(
                         label = { Text("Price (K)") },
                         singleLine = true
                     )
+                    if (productMessage.isNotEmpty()) {
+                        Text(
+                            text = productMessage,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (
-                            productName.isNotBlank() &&
-                            productDescription.isNotBlank() &&
-                            productPrice.isNotBlank()
-                        ) {
+                        val priceValue = productPrice.toDoubleOrNull()
 
+                        if (
+                            productName.isBlank() ||
+                            productDescription.isBlank() ||
+                            productPrice.isBlank()
+                        ) {
+                            productMessage = "Please fill in all the fields."
+                        } else if (priceValue == null || priceValue <= 0) {
+                            productMessage = "Enter a valid price greater than zero."
+                        } else {
                             val newProduct = ArtisanProduct(
                                 productName,
                                 productDescription,

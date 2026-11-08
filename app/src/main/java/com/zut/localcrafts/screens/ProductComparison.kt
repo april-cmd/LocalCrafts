@@ -1,4 +1,3 @@
-
 package com.zut.localcrafts.screens
 
 import androidx.compose.foundation.layout.*
@@ -17,10 +16,11 @@ private data class ArtisanListing(
     val location: String,
     val description: String,
     val contact: String,
-    val otherProducts: List<String>
+    val products: List<String>
 )
 
 private val sampleArtisans = listOf(
+
     ArtisanListing(
         artisanName = "Grace Banda",
         businessName = "Grace Crafts",
@@ -28,30 +28,69 @@ private val sampleArtisans = listOf(
         location = "Lusaka",
         description = "Handmade jewellery created with care and creativity.",
         contact = "Not provided yet",
-        otherProducts = listOf("Bracelets", "Earrings", "Anklets")
+        products = listOf(
+            "Beaded Necklace", "Bracelets", "Earrings", "Anklets"
+        )
     ),
+
     ArtisanListing(
         artisanName = "Martha Phiri",
         businessName = "Martha Designs",
-        price = "K150",
+        price = "K180",
         location = "Ndola",
         description = "Beautiful handmade crafts inspired by local traditions.",
         contact = "Not provided yet",
-        otherProducts = listOf("Baskets", "Decorations", "Handwoven bags")
+        products = listOf(
+            "Handwoven Basket", "Decorations", "Handwoven Bags"
+        )
     ),
+
+    ArtisanListing(
+        artisanName = "Peter",
+        businessName = "Art by Peter",
+        price = "K150",
+        location = "Lusaka",
+        description = "Unique handmade pottery and decorative pieces.",
+        contact = "Not provided yet",
+        products = listOf(
+            "Clay Flower Vase", "Clay Pots", "Pottery"
+        )
+    ),
+
     ArtisanListing(
         artisanName = "Lydia Mwansa",
         businessName = "Lydia Creations",
-        price = "K100",
+        price = "K200",
         location = "Kitwe",
-        description = "Unique handmade products made by a local artisan.",
+        description = "Traditional handmade bags and accessories.",
         contact = "Not provided yet",
-        otherProducts = listOf("Necklaces", "Traditional bags", "Accessories")
+        products = listOf(
+            "Traditional Bag", "Accessories", "Handmade Bags"
+        )
+    ),
+
+    ArtisanListing(
+        artisanName = "John",
+        businessName = "John's Workshop",
+        price = "K100",
+        location = "Lusaka",
+        description = "Handcrafted wooden decorations made with care.",
+        contact = "Not provided yet",
+        products = listOf(
+            "Wooden Decoration", "Wooden Crafts", "Decor"
+        )
     )
 )
 
 @Composable
 fun SearchScreen(productName: String) {
+
+    // Find artisans who offer the selected product
+    val matchingArtisans = sampleArtisans.filter { artisan ->
+        artisan.products.any { product ->
+            product.equals(productName, ignoreCase = true)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -75,86 +114,100 @@ fun SearchScreen(productName: String) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        sampleArtisans.forEach { artisan ->
+        if (matchingArtisans.isEmpty()) {
 
-            var expanded by remember(artisan.artisanName) {
-                mutableStateOf(false)
-            }
+            Text(
+                text = "No artisans currently offer this product.",
+                style = MaterialTheme.typography.bodyLarge
+            )
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 14.dp),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 3.dp
-                )
-            ) {
+        } else {
 
-                Column(
-                    modifier = Modifier.padding(16.dp)
+            matchingArtisans.forEach { artisan ->
+
+                var expanded by remember(artisan.artisanName) {
+                    mutableStateOf(false)
+                }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 14.dp),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 3.dp
+                    )
                 ) {
 
-                    Text(
-                        text = artisan.businessName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(text = "Artisan: ${artisan.artisanName}")
-
-                    Text(text = "Price: ${artisan.price}")
-
-                    Text(text = "Location: ${artisan.location}")
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TextButton(
-                        onClick = {
-                            expanded = !expanded
-                        }
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
+
                         Text(
-                            text = if (expanded) {
-                                "Show less ▲"
-                            } else {
-                                "View artisan details ▼"
+                            text = artisan.businessName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(text = "Artisan: ${artisan.artisanName}")
+
+                        Text(text = "Price: ${artisan.price}")
+
+                        Text(text = "Location: ${artisan.location}")
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        TextButton(
+                            onClick = {
+                                expanded = !expanded
                             }
-                        )
-                    }
+                        ) {
+                            Text(
+                                text = if (expanded) {
+                                    "Show less ▲"
+                                } else {
+                                    "View artisan details ▼"
+                                }
+                            )
+                        }
 
-                    if (expanded) {
+                        if (expanded) {
 
-                        HorizontalDivider()
+                            HorizontalDivider()
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = "About the business",
-                            fontWeight = FontWeight.Bold
-                        )
+                            Text(
+                                text = "About the business",
+                                fontWeight = FontWeight.Bold
+                            )
 
-                        Text(text = artisan.description)
+                            Text(text = artisan.description)
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = "Contact",
-                            fontWeight = FontWeight.Bold
-                        )
+                            Text(
+                                text = "Contact",
+                                fontWeight = FontWeight.Bold
+                            )
 
-                        Text(text = artisan.contact)
+                            Text(text = artisan.contact)
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = "Other products",
-                            fontWeight = FontWeight.Bold
-                        )
+                            Text(
+                                text = "Other products",
+                                fontWeight = FontWeight.Bold
+                            )
 
-                        artisan.otherProducts.forEach { product ->
-                            Text(text = "• $product")
+                            artisan.products
+                                .filterNot {
+                                    it.equals(productName, ignoreCase = true)
+                                }
+                                .forEach { product ->
+                                    Text(text = "• $product")
+                                }
                         }
                     }
                 }

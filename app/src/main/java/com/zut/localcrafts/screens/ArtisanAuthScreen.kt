@@ -156,6 +156,12 @@ fun ArtisanAuthScreen(
                     email.isBlank() || password.isBlank() ->
                         "Please enter your email and password."
 
+                    !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
+                        "Please enter a valid email address."
+
+                    password.length < 8 ->
+                        "Password must contain at least 8 characters."
+
                     isRegistering && (
                             fullName.isBlank() ||
                                     businessName.isBlank() ||
