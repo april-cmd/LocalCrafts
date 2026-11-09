@@ -38,9 +38,7 @@ Displays available handmade products to help customers discover crafts showcased
 Allows customers to compare products from other artisans and provides full information about the particular artisan
 
 ### 4.5 Artisan Profile Page
-Allows artisans to create and manage their business profiles by providing personal and business information. Artisans can also manage their handmade products by adding images, descriptions, prices and locations.
-
-The screen includes dynamically changing sections for profile details and product management without requiring navigation away from the main screen.
+Allows artisans to create and manage their business profiles by providing personal and business information, and allow artisans can also manage their handmade products by adding descriptions, prices and locations.
 
 ## 5. Technologies Used
 
