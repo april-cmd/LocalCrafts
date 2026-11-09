@@ -11,7 +11,13 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,17 +28,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zut.localcrafts.data.Artisan
+import com.zut.localcrafts.ui.theme.craftFieldColors
 import com.zut.localcrafts.viewmodel.LocalCraftsViewModel
 import com.zut.localcrafts.viewmodel.LocalCraftsViewModelFactory
 import java.util.UUID
 
 @Composable
 fun ArtisanAuthScreen(
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (artisanId: String) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -52,6 +60,20 @@ fun ArtisanAuthScreen(
     var confirmPassword by remember { mutableStateOf("") }
 
     var message by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var showPassword by remember { mutableStateOf(false) }
+
+    val passwordTransformation =
+        if (showPassword) VisualTransformation.None else PasswordVisualTransformation()
+    val visibilityToggle: @Composable () -> Unit = {
+        IconButton(onClick = { showPassword = !showPassword }) {
+            Icon(
+                imageVector = if (showPassword) Icons.Outlined.VisibilityOff
+                else Icons.Outlined.Visibility,
+                contentDescription = if (showPassword) "Hide password" else "Show password"
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -91,6 +113,8 @@ fun ArtisanAuthScreen(
                 onValueChange = { fullName = it },
                 label = { Text("Full Name") },
                 modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
@@ -101,6 +125,8 @@ fun ArtisanAuthScreen(
                 onValueChange = { businessName = it },
                 label = { Text("Business Name") },
                 modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
@@ -112,6 +138,8 @@ fun ArtisanAuthScreen(
             onValueChange = { email = it },
             label = { Text("Email Address") },
             modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
             singleLine = true
         )
 
@@ -124,6 +152,8 @@ fun ArtisanAuthScreen(
                 onValueChange = { phoneNumber = it },
                 label = { Text("Phone / WhatsApp Number") },
                 modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
@@ -134,6 +164,8 @@ fun ArtisanAuthScreen(
                 onValueChange = { location = it },
                 label = { Text("Location") },
                 modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
@@ -153,8 +185,11 @@ fun ArtisanAuthScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = passwordTransformation,
+            trailingIcon = visibilityToggle,
             modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
             singleLine = true
         )
 
@@ -166,8 +201,10 @@ fun ArtisanAuthScreen(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirm Password") },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = passwordTransformation,
                 modifier = Modifier.fillMaxWidth(),
+            colors = craftFieldColors(),
+            shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
 
@@ -185,7 +222,7 @@ fun ArtisanAuthScreen(
                     !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() ->
                         "Please enter a valid email address."
 
-                    password.length < 8 ->
+                    isRegistering && password.length < 8 ->
                         "Password must contain at least 8 characters."
 
                     isRegistering && (
@@ -205,25 +242,45 @@ fun ArtisanAuthScreen(
                 message = errorMessage
 
                 if (errorMessage.isEmpty()) {
+                    isLoading = true
+
                     if (isRegistering) {
                         val newArtisan = Artisan(
                             artisanId = UUID.randomUUID().toString(),
-                            fullName = fullName,
-                            businessName = businessName,
-                            email = email,
-                            phoneNumber = phoneNumber,
-                            location = location,
-                            description = description
+                            fullName = fullName.trim(),
+                            businessName = businessName.trim(),
+                            email = email.trim(),
+                            phoneNumber = phoneNumber.trim(),
+                            location = location.trim(),
+                            description = description.trim()
                         )
-                        viewModel.saveArtisan(newArtisan)
+                        viewModel.register(newArtisan, password) { created ->
+                            isLoading = false
+                            if (created != null) {
+                                onLoginSuccess(created.artisanId)
+                            } else {
+                                message = "An account with this email already exists. Please log in."
+                            }
+                        }
+                    } else {
+                        viewModel.login(email, password) { artisan ->
+                            isLoading = false
+                            if (artisan != null) {
+                                onLoginSuccess(artisan.artisanId)
+                            } else {
+                                // Same message for a wrong email or a wrong password
+                                message = "Incorrect email or password."
+                            }
+                        }
                     }
-                    onLoginSuccess()
                 }
             },
+            enabled = !isLoading,
             modifier = Modifier.fillMaxWidth(0.75f)
         ) {
             Text(
-                text = if (isRegistering) "Create Account" else "Login"
+                text = if (isLoading) "Please wait..."
+                else if (isRegistering) "Create Account" else "Login"
             )
         }
 
@@ -232,7 +289,7 @@ fun ArtisanAuthScreen(
         if (message.isNotEmpty()) {
             Text(
                 text = message,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.error
             )
 
             Spacer(modifier = Modifier.height(8.dp))

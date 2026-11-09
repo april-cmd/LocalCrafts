@@ -15,6 +15,9 @@ interface ArtisanDao {
     @Query("SELECT * FROM artisans")
     fun getAllArtisans(): Flow<List<Artisan>>
 
+    @Query("SELECT * FROM artisans WHERE LOWER(email) = LOWER(:email) LIMIT 1")
+    suspend fun getArtisanByEmail(email: String): Artisan?
+
     @Query("SELECT * FROM artisans WHERE artisanId = :artisanId")
     suspend fun getArtisanById(artisanId: String): Artisan?
 }
