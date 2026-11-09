@@ -64,26 +64,40 @@ The screen includes dynamically changing sections for profile details and produc
 ### 7.1 User Authentication and Login
 
 **What it is:**
+A security and identity management mechanism that allows users (artisans) to authenticate, create accounts, and securely manage their private business profiles and product inventory.
 
 **Why it is needed in LocalCrafts:**
+It enables local artisans in Zambia to securely manage their business information (artisan name, business name, location, email, and description) and maintain ownership over their showcased products.
 
 **Implementation:**
+Implemented using Jetpack Compose interactive forms for login and registration, backed by Room database storage (`Artisan` entity, `ArtisanDao`, and `LocalCraftsRepository`), managed through `LocalCraftsViewModel` using `StateFlow` and coroutines.
 
 **Sources consulted:**
+- Android Developer Documentation on Jetpack Compose and State management.
+- Room Persistence Library guide.
+- Android Architecture Components guide.
 
 **Challenges encountered:**
+Handling asynchronous Room database flows and ensuring seamless navigation and state synchronization between the authentication screen and the artisan dashboard.
 
 ### 7.2 Dark Mode
 
 **What it is:**
+A display setting that uses a dark color palette for low-light environments, reducing eye strain and improving visual comfort.
 
 **Why it is needed in LocalCrafts:**
+Provides user preference customization and accessibility for customers and artisans browsing handmade crafts in diverse lighting conditions.
 
 **Implementation:**
+Implemented using Material 3 `darkColorScheme` and `lightColorScheme`, a custom `ThemeController`, and a `CompositionLocalProvider` (`LocalThemeController`). Interactive toggle switches are provided on the Landing Page, Customer Homepage, and Artisan Dashboard to allow instant toggling between light and dark themes.
 
 **Sources consulted:**
+- Material 3 Theming and Color schemes documentation.
+- Jetpack Compose Dark Theme implementation guide.
+- Compose CompositionLocal documentation.
 
 **Challenges encountered:**
+Propagating the theme toggle state across different navigation destinations cleanly without modifying every navigation screen signature, solved elegantly via Compose `CompositionLocal`.
 
 ## 8. Group Members
 
