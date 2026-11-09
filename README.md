@@ -34,8 +34,8 @@ Allows artisans to create accounts and log in to access their account-related fe
 ### 4.3 Customer Homepage
 Displays available handmade products to help customers discover crafts showcased by local artisans.
 
-### 4.4 Customer Search Page
-Allows customers to search for specific products and artisans.
+### 4.4 Product Comparison page
+Allows customers to compare products from other artisans and provides full information about the particular artisan
 
 ### 4.5 Artisan Profile Page
 Allows artisans to create and manage their business profiles by providing personal and business information. Artisans can also manage their handmade products by adding images, descriptions, prices and locations.
@@ -101,8 +101,10 @@ Propagating the theme toggle state across different navigation destinations clea
 
 ## 8. Group Members
 
-- Balica Mukange – 2421009
-- Chandi Chileshe – 2410226
-- Benny Simpamba – 2410092
-- John Mwando – 2410053
-- Robby Chungo – 2410051
+| Full Name | Student Number |
+|-----------|----------------|
+| Balica Mukange | 2421009 |
+| Chandi Chileshe | 2410226 |
+| Benny Simpamba | 2410092 |
+| John Mwando | 2410053|
+| Robby Chungo | 2410051 |
