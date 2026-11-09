@@ -6,8 +6,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModel
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModelFactory
 
 private data class ArtisanListing(
     val artisanName: String,
@@ -27,7 +31,7 @@ private val sampleArtisans = listOf(
         price = "K120",
         location = "Lusaka",
         description = "Handmade jewellery created with care and creativity.",
-        contact = "Not provided yet",
+        contact = "+260 971 234567 | grace@crafts.com",
         products = listOf(
             "Beaded Necklace", "Bracelets", "Earrings", "Anklets"
         )
@@ -39,7 +43,7 @@ private val sampleArtisans = listOf(
         price = "K180",
         location = "Ndola",
         description = "Beautiful handmade crafts inspired by local traditions.",
-        contact = "Not provided yet",
+        contact = "+260 966 876543",
         products = listOf(
             "Handwoven Basket", "Decorations", "Handwoven Bags"
         )
@@ -51,7 +55,7 @@ private val sampleArtisans = listOf(
         price = "K150",
         location = "Lusaka",
         description = "Unique handmade pottery and decorative pieces.",
-        contact = "Not provided yet",
+        contact = "+260 955 112233",
         products = listOf(
             "Clay Flower Vase", "Clay Pots", "Pottery"
         )
@@ -63,7 +67,7 @@ private val sampleArtisans = listOf(
         price = "K200",
         location = "Kitwe",
         description = "Traditional handmade bags and accessories.",
-        contact = "Not provided yet",
+        contact = "+260 977 445566",
         products = listOf(
             "Traditional Bag", "Accessories", "Handmade Bags"
         )
@@ -75,7 +79,7 @@ private val sampleArtisans = listOf(
         price = "K100",
         location = "Lusaka",
         description = "Handcrafted wooden decorations made with care.",
-        contact = "Not provided yet",
+        contact = "+260 962 998877",
         products = listOf(
             "Wooden Decoration", "Wooden Crafts", "Decor"
         )
@@ -85,16 +89,63 @@ private val sampleArtisans = listOf(
 @Composable
 fun ProductComparisonScreen(productName: String) {
 
-    // Find artisans who offer the selected product
-    val matchingArtisans = sampleArtisans.filter { artisan ->
+    val context = LocalContext.current
+    val viewModel: LocalCraftsViewModel = viewModel(
+        factory = LocalCraftsViewModelFactory(context)
+    )
+
+    val dbArtisans by viewModel.artisans.collectAsState()
+    val dbProducts by viewModel.products.collectAsState()
+
+    val dbListings = dbProducts
+        .filter { it.productName.contains(productName, ignoreCase = true) }
+        .map { prod ->
+            val artisan = dbArtisans.find { it.artisanId == prod.artisanId }
+            val otherProducts = dbProducts
+                .filter { it.artisanId == prod.artisanId }
+                .map { it.productName }
+
+            val contactInfo = listOfNotNull(
+                artisan?.phoneNumber?.takeIf { it.isNotBlank() },
+                artisan?.email?.takeIf { it.isNotBlank() }
+            ).joinToString(" | ").ifBlank { "Not provided yet" }
+
+            if (artisan != null) {
+                ArtisanListing(
+                    artisanName = artisan.fullName,
+                    businessName = artisan.businessName.ifBlank { artisan.fullName },
+                    price = "K${prod.price}",
+                    location = artisan.location,
+                    description = artisan.description,
+                    contact = contactInfo,
+                    products = if (otherProducts.isNotEmpty()) otherProducts else listOf(prod.productName)
+                )
+            } else {
+                ArtisanListing(
+                    artisanName = "Local Artisan",
+                    businessName = "Artisan Store",
+                    price = "K${prod.price}",
+                    location = "Lusaka",
+                    description = prod.description,
+                    contact = "Not provided yet",
+                    products = listOf(prod.productName)
+                )
+            }
+        }
+
+    val sampleMatches = sampleArtisans.filter { artisan ->
         artisan.products.any { product ->
-            product.equals(productName, ignoreCase = true)
+            product.contains(productName, ignoreCase = true)
         }
     }
+
+    val matchingArtisans = (dbListings + sampleMatches).distinctBy { it.businessName }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -188,7 +239,7 @@ fun ProductComparisonScreen(productName: String) {
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "Contact",
+                                text = "Contact Information",
                                 fontWeight = FontWeight.Bold
                             )
 

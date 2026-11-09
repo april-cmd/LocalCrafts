@@ -1,11 +1,13 @@
 package com.zut.localcrafts.screens
 
+import com.zut.localcrafts.data.Artisan
 import com.zut.localcrafts.data.Product
 import com.zut.localcrafts.viewmodel.LocalCraftsViewModel
 import com.zut.localcrafts.viewmodel.LocalCraftsViewModelFactory
 import java.util.UUID
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,24 +32,27 @@ fun ArtisanProfileScreen(
         factory = LocalCraftsViewModelFactory(context)
     )
 
-    // Get products from Room Database
+    // Get products and artisans from Room Database
     val products by viewModel.products.collectAsState()
+    val artisans by viewModel.artisans.collectAsState()
 
-    var selectedSection by remember {
-        mutableStateOf("My Profile")
-    }
+    val activeArtisan = artisans.lastOrNull()
 
     // Artisan information
     var artisanName by remember {
-        mutableStateOf("Grace Banda")
+        mutableStateOf("")
     }
 
     var businessName by remember {
-        mutableStateOf("Grace Crafts")
+        mutableStateOf("")
+    }
+
+    var phoneNumber by remember {
+        mutableStateOf("")
     }
 
     var location by remember {
-        mutableStateOf("Lusaka")
+        mutableStateOf("")
     }
 
     var speciality by remember {
@@ -55,9 +60,27 @@ fun ArtisanProfileScreen(
     }
 
     var description by remember {
-        mutableStateOf(
-            "I create beautiful handmade jewellery inspired by local creativity."
-        )
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(activeArtisan) {
+        if (activeArtisan != null) {
+            artisanName = activeArtisan.fullName
+            businessName = activeArtisan.businessName
+            phoneNumber = activeArtisan.phoneNumber
+            location = activeArtisan.location
+            description = activeArtisan.description
+        } else {
+            artisanName = "Grace Banda"
+            businessName = "Grace Crafts"
+            phoneNumber = "+260 971 234567"
+            location = "Lusaka"
+            description = "I create beautiful handmade jewellery inspired by local creativity."
+        }
+    }
+
+    var selectedSection by remember {
+        mutableStateOf("My Profile")
     }
 
     var profileMessage by remember {
@@ -96,6 +119,8 @@ fun ArtisanProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
@@ -181,6 +206,15 @@ fun ArtisanProfileScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Phone / WhatsApp Number") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
                 value = location,
                 onValueChange = { location = it },
                 label = { Text("Location") },
@@ -213,12 +247,27 @@ fun ArtisanProfileScreen(
                     if (
                         artisanName.isBlank() ||
                         businessName.isBlank() ||
+                        phoneNumber.isBlank() ||
                         location.isBlank() ||
                         speciality.isBlank() ||
                         description.isBlank()
                     ) {
                         profileMessage = "Please fill in all the fields."
                     } else {
+                        val artisanIdToUse = activeArtisan?.artisanId ?: UUID.randomUUID().toString()
+                        val emailToUse = activeArtisan?.email ?: "artisan@localcrafts.com"
+
+                        val updatedArtisan = Artisan(
+                            artisanId = artisanIdToUse,
+                            fullName = artisanName,
+                            businessName = businessName,
+                            email = emailToUse,
+                            phoneNumber = phoneNumber,
+                            location = location,
+                            description = description
+                        )
+
+                        viewModel.saveArtisan(updatedArtisan)
                         profileMessage = "Profile updated successfully!"
                     }
                 },
@@ -439,7 +488,7 @@ fun ArtisanProfileScreen(
                                 },
 
                                 artisanId = if (editingIndex == -1) {
-                                    "ART001"
+                                    activeArtisan?.artisanId ?: "ART001"
                                 } else {
                                     products[editingIndex].artisanId
                                 },

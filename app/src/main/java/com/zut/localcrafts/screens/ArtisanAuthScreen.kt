@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -17,21 +19,33 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zut.localcrafts.data.Artisan
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModel
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModelFactory
+import java.util.UUID
 
 @Composable
 fun ArtisanAuthScreen(
     onLoginSuccess: () -> Unit
 ) {
 
+    val context = LocalContext.current
+    val viewModel: LocalCraftsViewModel = viewModel(
+        factory = LocalCraftsViewModelFactory(context)
+    )
+
     var isRegistering by remember { mutableStateOf(false) }
 
     var fullName by remember { mutableStateOf("") }
     var businessName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -42,6 +56,8 @@ fun ArtisanAuthScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -102,6 +118,16 @@ fun ArtisanAuthScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         if (isRegistering) {
+
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Phone / WhatsApp Number") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = location,
@@ -165,6 +191,7 @@ fun ArtisanAuthScreen(
                     isRegistering && (
                             fullName.isBlank() ||
                                     businessName.isBlank() ||
+                                    phoneNumber.isBlank() ||
                                     location.isBlank() ||
                                     description.isBlank()
                             ) -> "Please complete all registration fields."
@@ -178,6 +205,18 @@ fun ArtisanAuthScreen(
                 message = errorMessage
 
                 if (errorMessage.isEmpty()) {
+                    if (isRegistering) {
+                        val newArtisan = Artisan(
+                            artisanId = UUID.randomUUID().toString(),
+                            fullName = fullName,
+                            businessName = businessName,
+                            email = email,
+                            phoneNumber = phoneNumber,
+                            location = location,
+                            description = description
+                        )
+                        viewModel.saveArtisan(newArtisan)
+                    }
                     onLoginSuccess()
                 }
             },
