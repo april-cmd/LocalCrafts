@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Artisan::class, Product::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LocalCraftsDatabase : RoomDatabase() {
@@ -27,7 +27,9 @@ abstract class LocalCraftsDatabase : RoomDatabase() {
                     context.applicationContext,
                     LocalCraftsDatabase::class.java,
                     "localcrafts_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration(true)
+                    .build()
 
                 INSTANCE = instance
                 instance

@@ -10,6 +10,7 @@ data class Artisan(
     val fullName: String,
     val businessName: String,
     val email: String,
+    val phoneNumber: String = "",
     val location: String,
     val description: String
 )

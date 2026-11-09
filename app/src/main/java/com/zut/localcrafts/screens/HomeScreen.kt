@@ -11,9 +11,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModel
+import com.zut.localcrafts.viewmodel.LocalCraftsViewModelFactory
 
 private data class SampleProduct(
     val name: String,
@@ -27,6 +31,13 @@ private data class SampleProduct(
 fun HomeScreen(
     onProductClick: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val viewModel: LocalCraftsViewModel = viewModel(
+        factory = LocalCraftsViewModelFactory(context)
+    )
+
+    val dbArtisans by viewModel.artisans.collectAsState()
+    val dbProducts by viewModel.products.collectAsState()
 
     var searchText by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("All") }
@@ -36,7 +47,7 @@ fun HomeScreen(
         "Baskets", "Decor"
     )
 
-    val products = listOf(
+    val sampleProductsList = listOf(
         SampleProduct("Beaded Necklace", "Grace Crafts", "K120", "Jewellery", "📿"),
         SampleProduct("Handwoven Basket", "Martha Designs", "K180", "Baskets", "🧺"),
         SampleProduct("Clay Flower Vase", "Art by Peter", "K150", "Pottery", "🏺"),
@@ -44,14 +55,30 @@ fun HomeScreen(
         SampleProduct("Wooden Decoration", "John's Workshop", "K100", "Decor", "🪵")
     )
 
-    val filteredProducts = products.filter { product ->
+    val customDbProducts = dbProducts.map { dbProd ->
+        val artisan = dbArtisans.find { it.artisanId == dbProd.artisanId }
+        val artisanDisplayName = artisan?.businessName?.ifBlank { artisan.fullName }
+            ?: artisan?.fullName
+            ?: "Local Artisan"
+        SampleProduct(
+            name = dbProd.productName,
+            artisan = artisanDisplayName,
+            price = "K${dbProd.price}",
+            category = dbProd.category,
+            emoji = "✨"
+        )
+    }
+
+    val allProducts = customDbProducts + sampleProductsList
+
+    val filteredProducts = allProducts.filter { product ->
         val matchesSearch =
             product.name.contains(searchText, ignoreCase = true) ||
                     product.artisan.contains(searchText, ignoreCase = true)
 
         val matchesCategory =
             selectedCategory == "All" ||
-                    product.category == selectedCategory
+                    product.category.equals(selectedCategory, ignoreCase = true)
 
         matchesSearch && matchesCategory
     }
@@ -59,6 +86,8 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
@@ -215,6 +244,49 @@ fun HomeScreen(
         Text(
             text = "Every handmade creation tells a story. Discover the people behind the products and support their creativity."
         )
+
+        if (dbArtisans.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            dbArtisans.forEach { artisan ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp)
+                    ) {
+                        Text(
+                            text = artisan.businessName.ifBlank { artisan.fullName },
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp
+                        )
+                        if (artisan.fullName.isNotBlank()) {
+                            Text(
+                                text = "Artisan: ${artisan.fullName}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        if (artisan.location.isNotBlank()) {
+                            Text(
+                                text = "Location: ${artisan.location}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        if (artisan.description.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = artisan.description,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
     }
