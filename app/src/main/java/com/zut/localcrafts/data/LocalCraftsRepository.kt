@@ -12,6 +12,10 @@ class LocalCraftsRepository(
         artisanDao.insertArtisan(artisan)
     }
 
+    suspend fun getArtisanByEmail(email: String): Artisan? {
+        return artisanDao.getArtisanByEmail(email)
+    }
+
     fun getAllArtisans(): Flow<List<Artisan>> {
         return artisanDao.getAllArtisans()
     }

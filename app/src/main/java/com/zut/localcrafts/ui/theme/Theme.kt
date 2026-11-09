@@ -1,63 +1,79 @@
 package com.zut.localcrafts.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    background = Color(0xFF1C1B1F),
-    surface = Color(0xFF1C1B1F),
-    surfaceVariant = Color(0xFF49454F),
-    onPrimary = Color(0xFF381E72),
-    onSecondary = Color(0xFF332D41),
-    onTertiary = Color(0xFF492532),
-    onBackground = Color(0xFFE6E1E5),
-    onSurface = Color(0xFFE6E1E5),
-    onSurfaceVariant = Color(0xFFCAC4D0)
+    primary = Silver,
+    onPrimary = Ink,
+    primaryContainer = GraphiteVariant,
+    onPrimaryContainer = Silver,
+    secondary = SilverSoft,
+    onSecondary = Ink,
+    tertiary = TealLight,
+    onTertiary = Color(0xFF00262A),
+    tertiaryContainer = TealContainerDark,
+    onTertiaryContainer = OnTealContainerDark,
+    background = Black,
+    onBackground = Silver,
+    surface = Graphite,
+    onSurface = Silver,
+    surfaceVariant = GraphiteVariant,
+    onSurfaceVariant = SilverSoft,
+    outline = GraphiteLine,
+    outlineVariant = GraphiteLine,
+    secondaryContainer = Color(0xFF2A2F36),
+    onSecondaryContainer = Silver,
+    surfaceContainerLowest = Color(0xFF0A0B0D),
+    surfaceContainerLow = Color(0xFF131519),
+    surfaceContainer = Graphite,
+    surfaceContainerHigh = Color(0xFF1E2126),
+    surfaceContainerHighest = Color(0xFF262A30)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    surfaceVariant = Color(0xFFE7E0EC),
+    primary = Charcoal,
     onPrimary = Color.White,
+    primaryContainer = Fog,
+    onPrimaryContainer = Ink,
+    secondary = InkSoft,
     onSecondary = Color.White,
+    tertiary = Teal,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    onSurfaceVariant = Color(0xFF49454F)
+    tertiaryContainer = TealContainer,
+    onTertiaryContainer = OnTealContainer,
+    background = Mist,
+    onBackground = Ink,
+    surface = Color.White,
+    onSurface = Ink,
+    surfaceVariant = Fog,
+    onSurfaceVariant = InkSoft,
+    outline = Hairline,
+    outlineVariant = Hairline,
+    secondaryContainer = Color(0xFFE4E7EB),
+    onSecondaryContainer = Ink,
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFF8F9FA),
+    surfaceContainer = Color(0xFFF1F3F5),
+    surfaceContainerHigh = Fog,
+    surfaceContainerHighest = Color(0xFFE4E7EB)
 )
 
 @Composable
 fun LocalCraftsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    // Dynamic colour is removed on purpose: on Android 12+ it replaces our
+    // palette with the phone's wallpaper colours, so the app would not look
+    // like LocalCrafts. We always use our own charcoal and white palette instead.
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
@@ -65,3 +81,14 @@ fun LocalCraftsTheme(
         content = content
     )
 }
+
+/** Text field colours shared by the artisan screens: neutral outline, teal accent when focused. */
+@Composable
+fun craftFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = MaterialTheme.colorScheme.tertiary,
+    focusedLabelColor = MaterialTheme.colorScheme.tertiary,
+    cursorColor = MaterialTheme.colorScheme.tertiary,
+    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+    focusedContainerColor = MaterialTheme.colorScheme.surface,
+    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+)
